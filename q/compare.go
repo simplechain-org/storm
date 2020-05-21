@@ -114,6 +114,58 @@ func compare(a, b interface{}, tok token.Token) bool {
 		return constant.Compare(constant.MakeInt64(x), tok, constant.MakeInt64(y))
 	}
 
+	if typea != nil && typea.String() == "*big.Int" &&
+		typeb != nil && typeb.String() == "*big.Int" {
+
+		if typea.String() == "*big.Int" && vala.IsNil() {
+			return true
+		}
+
+		if typeb.String() == "*big.Int" {
+			if valb.IsNil() {
+				return true
+			}
+		}
+
+		var x, y int64
+		x = 1
+		switch vala.MethodByName("Cmp").Call([]reflect.Value{valb})[0].Int() {
+		case 0:
+			y = 1
+		case -1:
+			y = 2
+		case 1:
+			y = 0
+		}
+		return constant.Compare(constant.MakeInt64(x), tok, constant.MakeInt64(y))
+	}
+
+	if typea != nil && typea.String() == "*big.Float" &&
+		typeb != nil && typeb.String() == "*big.Float" {
+
+		if typea.String() == "*big.Float" && vala.IsNil() {
+			return true
+		}
+
+		if typeb.String() == "*big.Float" {
+			if valb.IsNil() {
+				return true
+			}
+		}
+
+		var x, y int64
+		x = 1
+		switch vala.MethodByName("Cmp").Call([]reflect.Value{valb})[0].Int() {
+		case 0:
+			y = 1
+		case -1:
+			y = 2
+		case 1:
+			y = 0
+		}
+		return constant.Compare(constant.MakeInt64(x), tok, constant.MakeInt64(y))
+	}
+
 	if tok == token.EQL {
 		return reflect.DeepEqual(a, b)
 	}

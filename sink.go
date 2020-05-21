@@ -1,12 +1,13 @@
 package storm
 
 import (
-	"reflect"
-	"sort"
-	"time"
 	"github.com/asdine/storm/v3/index"
 	"github.com/asdine/storm/v3/q"
 	bolt "go.etcd.io/bbolt"
+	"math/big"
+	"reflect"
+	"sort"
+	"time"
 )
 
 type item struct {
@@ -153,6 +154,32 @@ func (s *sorter) compareValue(left reflect.Value, right reflect.Value) int {
 				}
 			}
 		}
+
+	case reflect.Ptr:
+		if lt, lok := left.Interface().(*big.Int); lok {
+			if rt, rok := right.Interface().(*big.Int); rok {
+				if lok && rok {
+					if lt.Cmp(rt) < 0 {
+						return -1
+					} else {
+						return 1
+					}
+				}
+			}
+		}
+
+		if lt, lok := left.Interface().(*big.Float); lok {
+			if rt, rok := right.Interface().(*big.Float); rok {
+				if lok && rok {
+					if lt.Cmp(rt) < 0 {
+						return -1
+					} else {
+						return 1
+					}
+				}
+			}
+		}
+
 	default:
 		rawLeft, err := toBytes(left.Interface(), s.node.Codec())
 		if err != nil {
